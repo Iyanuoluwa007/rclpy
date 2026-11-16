@@ -56,6 +56,13 @@ jobs:
           cd ws/src/rclpy/rclpy
           FILES=""
           for f in ${{ inputs.test_files }}; do FILES="$FILES test/$f"; done
-          if [ -z "$FILES" ]; then FILES="test"; fi
+          if [ -z "$FILES" ]; then FILES=$(ls test/test_*.py); fi
           K="${{ inputs.pytest_filter }}"
-          if [ -n "$K" ]; then python3 -m pytest -q $FILES -k "$K" -p no:cacheprovider; else python3 -m pytest -q $FILES -p no:cacheprovider; fi
+          FAILED=""
+          for f in $FILES; do
+            echo "=== $f"
+            if [ -n "$K" ]; then ARGS="-k $K"; else ARGS=""; fi
+            timeout 600 python3 -m pytest -q $f $ARGS -p no:cacheprovider || FAILED="$FAILED $f"
+          done
+          echo "FAILED FILES:$FAILED"
+          [ -z "$FAILED" ]
