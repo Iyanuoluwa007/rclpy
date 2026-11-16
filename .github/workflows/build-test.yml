@@ -1,0 +1,56 @@
+name: build-test
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or SHA of this fork to build
+        required: true
+      pytest_filter:
+        description: Optional pytest -k expression (empty runs all tests)
+        required: false
+        default: ''
+      test_files:
+        description: Optional space-separated test files under rclpy/test (empty runs all)
+        required: false
+        default: ''
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ros:rolling
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          path: ws/src/rclpy
+      - name: deps
+        shell: bash
+        run: |
+          apt-get update -qq
+          rosdep update -q
+          cd ws && rosdep install --from-paths src -y -i -q --rosdistro rolling
+          apt-get install -y -qq ros-rolling-ament-cmake-pytest python3-pytest-timeout || true
+      - name: build
+        shell: bash
+        run: |
+          source /opt/ros/rolling/setup.bash
+          cd ws && colcon build --packages-select rclpy --event-handlers console_direct-
+      - name: lint
+        shell: bash
+        run: |
+          source /opt/ros/rolling/setup.bash
+          cd ws/src/rclpy/rclpy
+          ament_flake8 rclpy test || true
+          ament_pep257 rclpy || true
+          ament_mypy --config mypy.ini rclpy 2>/dev/null || ament_mypy rclpy || true
+      - name: test
+        shell: bash
+        run: |
+          source /opt/ros/rolling/setup.bash
+          source ws/install/setup.bash
+          cd ws/src/rclpy/rclpy
+          FILES=""
+          for f in ${{ inputs.test_files }}; do FILES="$FILES test/$f"; done
+          if [ -z "$FILES" ]; then FILES="test"; fi
+          K="${{ inputs.pytest_filter }}"
+          if [ -n "$K" ]; then python3 -m pytest -q $FILES -k "$K" -p no:cacheprovider; else python3 -m pytest -q $FILES -p no:cacheprovider; fi
