@@ -48,6 +48,7 @@ jobs:
         run: |
           source /opt/ros/rolling/setup.bash
           source ws/install/setup.bash
+          export PYTHONPATH="$PWD/ws/build/rclpy:$PYTHONPATH"
           cd ws/src/rclpy/rclpy
           FILES=""
           for f in ${{ inputs.test_files }}; do FILES="$FILES test/$f"; done
