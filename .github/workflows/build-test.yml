@@ -41,6 +41,10 @@ jobs:
           source /opt/ros/rolling/setup.bash
           cd ws/src/rclpy/rclpy
           ament_flake8 rclpy test || true
+          ament_cpplint src || true
+          ament_uncrustify src || true
+          ament_copyright rclpy test src || true
+          ament_lint_cmake CMakeLists.txt || true
           ament_pep257 rclpy || true
           ament_mypy --config mypy.ini rclpy 2>/dev/null || ament_mypy rclpy || true
       - name: test
