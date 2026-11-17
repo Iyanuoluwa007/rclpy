@@ -34,11 +34,6 @@ jobs:
       - name: deps
         shell: bash
         run: |
-            . /etc/os-release
-            echo "deb [signed-by=$KEY] http://packages.ros.org/ros2-testing/ubuntu $VERSION_CODENAME main" > /etc/apt/sources.list.d/ros2-testing.list
-            cat /etc/apt/sources.list.d/ros2-testing.list
-            apt-get update -qq && apt-get dist-upgrade -y -qq
-          fi
           apt-get update -qq
           rosdep update -q
           cd ws && rosdep install --from-paths src -y -i -q --rosdistro rolling
