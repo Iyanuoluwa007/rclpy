@@ -13,6 +13,14 @@ on:
         description: Optional space-separated test files under rclpy/test (empty runs all)
         required: false
         default: ''
+      colcon_test:
+        description: Run colcon test (ctest) like the ROS build farm instead of the pytest loop
+        required: false
+        default: 'false'
+      ctest_args:
+        description: Extra ctest arguments for colcon test, e.g. -R test_executor --repeat until-fail:5
+        required: false
+        default: ''
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -47,7 +55,16 @@ jobs:
           ament_lint_cmake CMakeLists.txt || true
           ament_pep257 rclpy || true
           ament_mypy --ament-strict . || true
+      - name: colcon test
+        if: ${{ inputs.colcon_test == 'true' }}
+        shell: bash
+        run: |
+          source /opt/ros/rolling/setup.bash
+          cd ws
+          colcon test --packages-select rclpy --event-handlers console_direct- --ctest-args ${{ inputs.ctest_args }} || true
+          colcon test-result --all --verbose
       - name: test
+        if: ${{ inputs.colcon_test != 'true' }}
         shell: bash
         run: |
           source /opt/ros/rolling/setup.bash
