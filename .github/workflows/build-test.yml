@@ -17,6 +17,10 @@ on:
         description: Run colcon test (ctest) like the ROS build farm instead of the pytest loop
         required: false
         default: 'false'
+      testing_repo:
+        description: Install ROS packages from ros2-testing like the build farm
+        required: false
+        default: 'false'
       ctest_args:
         description: Extra ctest arguments for colcon test, e.g. -R test_executor --repeat until-fail:5
         required: false
@@ -34,6 +38,11 @@ jobs:
       - name: deps
         shell: bash
         run: |
+          if [ "${{ inputs.testing_repo }}" = "true" ]; then
+            grep -rl "packages.ros.org/ros2/" /etc/apt/sources.list.d/ | xargs -r sed -i 's#packages.ros.org/ros2/#packages.ros.org/ros2-testing/#'
+            grep -rh "packages.ros.org" /etc/apt/sources.list.d/ || true
+            apt-get update -qq && apt-get dist-upgrade -y -qq
+          fi
           apt-get update -qq
           rosdep update -q
           cd ws && rosdep install --from-paths src -y -i -q --rosdistro rolling
