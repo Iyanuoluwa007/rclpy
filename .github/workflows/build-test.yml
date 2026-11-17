@@ -39,8 +39,11 @@ jobs:
         shell: bash
         run: |
           if [ "${{ inputs.testing_repo }}" = "true" ]; then
-            grep -rl "packages.ros.org/ros2/" /etc/apt/sources.list.d/ | xargs -r sed -i 's#packages.ros.org/ros2/#packages.ros.org/ros2-testing/#'
-            grep -rh "packages.ros.org" /etc/apt/sources.list.d/ || true
+            grep -rn "ros.org" /etc/apt/ || true
+            for f in $(grep -rl "packages.ros.org/ros2/\|packages.ros.org/ros2 " /etc/apt/ || true); do
+              sed -i 's#packages.ros.org/ros2\([/ ]\)#packages.ros.org/ros2-testing#' "$f"
+            done
+            grep -rn "ros2-testing" /etc/apt/ || { echo "could not switch to ros2-testing"; exit 1; }
             apt-get update -qq && apt-get dist-upgrade -y -qq
           fi
           apt-get update -qq
