@@ -46,7 +46,7 @@ jobs:
           ament_copyright rclpy test src || true
           ament_lint_cmake CMakeLists.txt || true
           ament_pep257 rclpy || true
-          ament_mypy rclpy test || true
+          ament_mypy --ament-strict . || true
       - name: test
         shell: bash
         run: |
