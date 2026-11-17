@@ -40,8 +40,8 @@ jobs:
         run: |
           if [ "${{ inputs.testing_repo }}" = "true" ]; then
             grep -rn "ros.org" /etc/apt/ || true
-            for f in $(grep -rl "packages.ros.org/ros2/\|packages.ros.org/ros2 " /etc/apt/ || true); do
-              sed -i 's#packages.ros.org/ros2\([/ ]\)#packages.ros.org/ros2-testing#' "$f"
+            for f in $(grep -rl "packages.ros.org/ros2/ubuntu" /etc/apt/ || true); do
+              sed -i 's#packages.ros.org/ros2/ubuntu#packages.ros.org/ros2-testing/ubuntu#' "$f"
             done
             grep -rn "ros2-testing" /etc/apt/ || { echo "could not switch to ros2-testing"; exit 1; }
             apt-get update -qq && apt-get dist-upgrade -y -qq
