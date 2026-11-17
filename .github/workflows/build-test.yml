@@ -17,10 +17,6 @@ on:
         description: Run colcon test (ctest) like the ROS build farm instead of the pytest loop
         required: false
         default: 'false'
-      testing_repo:
-        description: Install ROS packages from ros2-testing like the build farm
-        required: false
-        default: 'false'
       ctest_args:
         description: Extra ctest arguments for colcon test, e.g. -R test_executor --repeat until-fail:5
         required: false
@@ -38,14 +34,6 @@ jobs:
       - name: deps
         shell: bash
         run: |
-          if [ "${{ inputs.testing_repo }}" = "true" ]; then
-            ls -la /etc/apt/sources.list.d/ /usr/share/keyrings/ || true
-            cat /etc/apt/sources.list.d/* || true
-            KEY=$(ls /usr/share/keyrings/ros*.gpg /etc/apt/keyrings/ros*.gpg 2>/dev/null | head -1)
-            if [ -z "$KEY" ]; then
-              curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-testing.gpg
-              KEY=/usr/share/keyrings/ros-testing.gpg
-            fi
             . /etc/os-release
             echo "deb [signed-by=$KEY] http://packages.ros.org/ros2-testing/ubuntu $VERSION_CODENAME main" > /etc/apt/sources.list.d/ros2-testing.list
             cat /etc/apt/sources.list.d/ros2-testing.list
