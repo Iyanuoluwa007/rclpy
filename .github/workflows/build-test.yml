@@ -62,7 +62,7 @@ jobs:
           for f in $FILES; do
             echo "=== $f"
             if [ -n "$K" ]; then ARGS="-k $K"; else ARGS=""; fi
-            timeout 600 python3 -m pytest -q $f $ARGS -p no:cacheprovider || FAILED="$FAILED $f"
+            timeout 600 python3 -m pytest -q -W error $f $ARGS -p no:cacheprovider || FAILED="$FAILED $f"
           done
           echo "FAILED FILES:$FAILED"
           [ -z "$FAILED" ]
